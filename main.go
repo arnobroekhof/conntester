@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +16,7 @@ import (
 const (
 	emojiCheckMark = "\xE2\x9C\x85"
 	emojiCrossMark = "\xE2\x9D\x8C"
+	checkRemoteIPUrl = "http://checkip.amazonaws.com/"
 )
 
 type Connections struct {
@@ -28,10 +30,15 @@ type Service struct {
 	Protocol string `yaml:"protocol"`
 }
 
-var configFile string
+var (
+	configFile string
+	withHostInfo bool
+)
+
 
 func init() {
 	flag.StringVar(&configFile, "config", "config.yaml", "the config file to use")
+	flag.BoolVar(&withHostInfo, "print-host-info", true, "print network info from the host")
 	flag.Parse()
 }
 
@@ -46,6 +53,10 @@ func main() {
 	err = yaml.Unmarshal(config, &connections)
 	if err != nil {
 		fmt.Printf("error while parsing config file: %s\n", err)
+	}
+
+	if withHostInfo {
+		printHostNetworkInfo()
 	}
 
 	waitGroup := sync.WaitGroup{}
@@ -103,4 +114,34 @@ func printOkOrError(ok bool, msg string) {
 	default:
 		fmt.Printf("%s  --> %s\n", []byte(emojiCrossMark), msg)
 	}
+}
+
+func printHostNetworkInfo() {
+	fmt.Printf("Local IP Address: %s\n", getLocalIP())
+	fmt.Printf("Remote IP Address: %s\n", getRemoteIP())
+}
+
+func getRemoteIP() string {
+	res, err := http.Get(checkRemoteIPUrl)
+	if err != nil {
+		return ""
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	return string(body)
+}
+
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
