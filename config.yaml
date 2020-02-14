@@ -1,0 +1,13 @@
+services:
+  - name: google
+    port: 443
+    host: google.nl
+    protocol: TCP
+  - name: google-dns
+    port: 5353
+    host: 8.8.8.8
+    protocol: UDP
+  - name: microsoft
+    port: 443
+    host: microsoft.nl
+    protocol: TCP
