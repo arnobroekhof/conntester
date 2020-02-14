@@ -1,6 +1,6 @@
 # Poor mans Connection Tester
 
-the program is able to test connectivity to TCP connection from a config file.
+the program is able to test connectivity to multiple connections from a config file.
 
 ## Installation
 download the latest binary release from the release page.
