@@ -3,7 +3,7 @@
 the program is able to test connectivity to multiple connections from a config file.
 
 ## Installation
-download the latest binary release from the release page.
+download the latest binary from the release page.
 
 ## usage:
 
